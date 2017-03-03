@@ -84,7 +84,7 @@ function ewp_get_page($user, $workout_id = null, $challenge_id = null, $event_id
             $out = "The type: $type is wrong";
 
     }
-    $out .= '     <div style=\'' . $sign_inline_style . '\'>powered by <a href="http://www.staniscia.net/endomondowp/">EndomondoWP</a>' . $contribCode . '</div>
+    $out .= '     <div style=\'' . $sign_inline_style . '\'>powered by <a href="//www.staniscia.net/endomondowp/">EndomondoWP</a>' . $contribCode . '</div>
                </div>';
 
     
@@ -101,7 +101,7 @@ function ewp_workout_html($user, $workout_id, $id, $width, $height)
         $out = '<iframe
 				   id="' . $id . '_ewp_forum_embed"  
 				   class="ewp_iframe"  
-				   src="http://www.endomondo.com/embed/workouts?w=' . $workout_id . '&width=' . $width . '&height=' . $height . '"
+				   src="//www.endomondo.com/embed/workouts?w=' . $workout_id . '&width=' . $width . '&height=' . $height . '"
 				   width="' . $width . '" 
 				   height="' . $height . '" 
 				   frameborder="0" 
@@ -121,7 +121,7 @@ function ewp_last_workout_html($user, $id, $width, $height)
         $out = '<iframe
 				   id="' . $id . '_ewp_forum_embed"  
 				   class="ewp_iframe"  
-				   src="http://www.endomondo.com/embed/workouts?userId=' . $user . '&width=' . $width . '&height=' . $height . '"
+				   src="//www.endomondo.com/embed/workouts?userId=' . $user . '&width=' . $width . '&height=' . $height . '"
 				   width="' . $width . '" 
 				   height="' . $height . '" 
 				   frameborder="0" 
@@ -139,7 +139,7 @@ function ewp_workout_list_html($user, $id, $width, $height)
     } else {
         $out = '<iframe
                    id="' . $id . '_ewp_forum_embed"
-                   src="http://www.endomondo.com/embed/user/workouts?id=' . $user . '&width=' . $width . '&height=' . $height . '"
+                   src="//www.endomondo.com/embed/user/workouts?id=' . $user . '&width=' . $width . '&height=' . $height . '"
 				   width="' . $width . '"
 				   height="' . $height . '"
                    frameborder="0"
@@ -157,7 +157,7 @@ function ewp_challenge_html($user, $challenge_id, $id, $width, $height)
     } else {
         $out = '<iframe
                    id="' . $id . '_ewp_forum_embed"
-                   src="http://www.endomondo.com/embed/challenge?id=' . $challenge_id . '&user=' . $user . '&measure=0&width=' . $width . '&height=' . $height . '"
+                   src="//www.endomondo.com/embed/challenge?id=' . $challenge_id . '&user=' . $user . '&measure=0&width=' . $width . '&height=' . $height . '"
 				   width="' . $width . '"
 				   height="' . $height . '"
                    frameborder="0"
@@ -175,7 +175,7 @@ function ewp_team_html($team_id, $id, $width, $height)
     } else {
         $out = '<iframe
                    id="' . $id . '_ewp_forum_embed"
-                   src="http://www.endomondo.com/embed/team/summary?id=' . $team_id . '&measure=0&width=' . $width . '&height=' . $height . '"
+                   src="//www.endomondo.com/embed/team/summary?id=' . $team_id . '&measure=0&width=' . $width . '&height=' . $height . '"
 				   width="' . $width . '"
 				   height="' . $height . '"
                    frameborder="0"
@@ -192,7 +192,7 @@ function ewp_event_html($event_id, $id, $width, $height)
     } else {
         $out = '<iframe
                    id="' . $id . '_ewp_forum_embed"
-                   src="http://www.endomondo.com/embed/event/' . $event_id . '?width=' . $width . '&height=' . $height . '"
+                   src="//www.endomondo.com/embed/event/' . $event_id . '?width=' . $width . '&height=' . $height . '"
 				   width="' . $width . '"
 				   height="' . $height . '"
                    frameborder="0"
@@ -225,7 +225,7 @@ function ewp_get_contrib()
 {
     $contribCode = "";
     if (get_option(EWP_ENABLED_ANALITYC, true)) {
-        $contribCode = '<img style=\'display: none;\' src="http://www.staniscia.net/ewp/logo.php?t=gif" alt="logo" onerror="this.parentNode.removeChild(this)" />';
+        $contribCode = '<img style=\'display: none;\' src="//www.staniscia.net/ewp/logo.php?t=gif" alt="logo" onerror="this.parentNode.removeChild(this)" />';
     }
     return $contribCode;
 }
