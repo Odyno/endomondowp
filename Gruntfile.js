@@ -110,8 +110,8 @@ module.exports = function(grunt) {
         options: {
           patterns: [
             {
-              match: /('SVT_VER', '\d+\.\d+\.\d+')/,
-              replacement: '\'SVT_VER\', \'<%= pkg.version %>\''
+              match: /('EWP_VERSION', '\d+\.\d+\.\d+')/,
+              replacement: '\'EWP_VERSION\', \'<%= pkg.version %>\''
             }
           ]
         },
@@ -216,7 +216,7 @@ module.exports = function(grunt) {
 
   // Default task.
   grunt.registerTask('default', ['build']);
-  grunt.registerTask('finalize', ['replace', 'build']);
+  grunt.registerTask('release', ['replace', 'build']);
   grunt.registerTask('dev', ['build', 'sync', 'browserSync', 'watch']);
   grunt.registerTask('build', ['less', 'cssmin', 'coffee', 'concat', 'uglify', 'replace']);
 

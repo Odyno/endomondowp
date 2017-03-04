@@ -13,7 +13,7 @@
 
 define('EWP_NAME', 'EndomondoWP');
 define('EWP_SYS_NAME', 'endomondowp');
-define('EWP_VERSION', '0.0.6');
+define('EWP_VERSION', '0.1.0');
 define('EWP_DIR', plugin_dir_path(__FILE__));
 define('___EWP_FILE___', __FILE__);
 

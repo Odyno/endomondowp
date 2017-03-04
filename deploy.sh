@@ -1,93 +1,220 @@
-#! /bin/bash
-# A modification of deploy script as found here: https://github.com/thenbrent/multisite-user-management/edit/master/deploy.sh
+#!/usr/bin/env bash
 
-# main config
-PLUGINSLUG="simple-vertical-timeline"
-CURRENTDIR=`pwd`
-MAINFILE="simple-vertical-timeline.php" # this should be the name of your main php file in the wordpress plugin
+# The slug of your WordPress.org plugin
+PLUGIN_SLUG="endomondowp"
 
-# git config
-GITPATH="$CURRENTDIR/" # this file should be in the base of your git repository
+SVN_USER="odyno"
 
-# svn config
-SVNPATH="/tmp/$PLUGINSLUG" # path to a temp SVN repo. No trailing slash required and don't add trunk.
-SVNURL="http://plugins.svn.wordpress.org/simple-vertical-timeline/" # Remote SVN repo on wordpress.org, with trailing slash
-SVNUSER="Odyno" # your svn username
+# GITHUB user who owns the repo
+GITHUB_REPO_OWNER="Odyno"
+
+# GITHUB Repository name
+GITHUB_REPO_NAME="endomondowp"
 
 
-# Let's begin...
-echo ".........................................."
-echo
-echo "Preparing to deploy wordpress plugin"
-echo
-echo ".........................................."
-echo
 
-# Check if subversion is installed before getting all worked up
-if ! which svn >/dev/null; then
-	echo "You'll need to install subversion before proceeding. Exiting....";
-	exit 1;
-fi
+if [ -z "$1" ] ; then echo "Please provide the tag name to deploy "; exit 1; fi
 
-# Check version in readme.txt is the same as plugin file after translating both to unix line breaks to work around grep's failure to identify mac line breaks
-NEWVERSION1=`grep "^Stable tag:" $GITPATH/readme.txt | awk -F' ' '{print $NF}'`
-echo "readme.txt version: $NEWVERSION1"
-NEWVERSION2=`grep "^Version:" $GITPATH/$MAINFILE | awk -F' ' '{print $NF}'`
-echo "$MAINFILE version: $NEWVERSION2"
 
-if [ "$NEWVERSION1" != "$NEWVERSION2" ]; then echo "Version in readme.txt & $MAINFILE don't match. Exiting...."; exit 1; fi
 
-echo "Versions match in readme.txt and $MAINFILE. Let's proceed..."
+# GITHUB tag to use
+GITHUB_TAG_NAME=$1
+VERSION=$GITHUB_TAG_NAME
 
-if git show-ref --tags --quiet --verify -- "refs/tags/$NEWVERSION1"
-	then
-		echo "Version $NEWVERSION1 already exists as git tag. Exiting....";
-		exit 1;
-	else
-		echo "Git version does not exist. Let's proceed..."
-fi
+INTERACTIVE=true
+if [ -z "$2" ] ; then INTERACTIVE=false; fi
 
-cd $GITPATH
-echo -e "Enter a commit message for this new version: \c"
-read COMMITMSG
-git commit -am "$COMMITMSG"
 
-echo "Tagging new version in git"
-git tag -a "$NEWVERSION1" -m "Tagging version $NEWVERSION1"
+MAINFILE=${PLUGIN_SLUG}.php
 
-echo "Pushing latest commit to origin, with tags"
-git push origin master
-git push origin master --tags
+# ----- STOP EDITING HERE -----
 
-echo
-echo "Creating local copy of SVN repo ..."
-svn co $SVNURL $SVNPATH
 
-echo "Clearing svn repo so we can overwrite it"
-svn rm $SVNPATH/trunk/*
 
-echo "Exporting the HEAD of master from git to the trunk of SVN"
-git checkout-index -a -f --prefix=$SVNPATH/trunk/
 
-echo "Ignoring github specific files and deployment script"
-svn propset svn:ignore "deploy.sh
-README.md
-.git
-.gitignore" "$SVNPATH/trunk/"
 
-echo "Changing directory to SVN and committing to trunk"
-cd $SVNPATH/trunk/
-# Add all new files that are not set to be ignored
-svn status | grep -v "^.[ \t]*\..*" | grep "^?" | awk '{print $2}' | xargs svn add
-svn commit --username=$SVNUSER -m "$COMMITMSG"
 
-echo "Creating new SVN tag & committing it"
-cd $SVNPATH
-svn copy trunk/ tags/$NEWVERSION1/
-cd $SVNPATH/tags/$NEWVERSION1
-svn commit --username=$SVNUSER -m "Tagging version $NEWVERSION1"
+# VARS
+ROOT_PATH=$(pwd)"/"
+TEMP_GITHUB_REPO=${PLUGIN_SLUG}"-git"
+TEMP_SVN_REPO=${PLUGIN_SLUG}"-svn"
+SVN_REPO="http://plugins.svn.wordpress.org/"${PLUGIN_SLUG}"/"
+GIT_REPO="git@github.com:"${GITHUB_REPO_OWNER}"/"${GITHUB_REPO_NAME}".git"
 
-echo "Removing temporary directory $SVNPATH"
-rm -fr $SVNPATH/
 
-echo "*** FIN ***"
+
+
+
+
+
+
+check_env () {
+
+    # Check if subversion is installed before getting all worked up
+    if ! which svn >/dev/null; then
+        echo "You'll need to install subversion before proceeding. Exiting....";
+        exit 1;
+    fi
+
+
+}
+
+clean_repo () {
+    # DELETE OLD TEMP DIRS
+    rm -Rf $ROOT_PATH$TEMP_GITHUB_REPO
+    rm -Rf $ROOT_PATH$TEMP_SVN_REPO
+}
+
+
+prepare_git_repo (){
+    ###
+    # PREPARE GIT REPOSITORY
+    ###
+    # CLONE GIT DIR
+    echo "Cloning GIT repository from GITHUB"
+    git clone --progress $GIT_REPO $TEMP_GITHUB_REPO || { echo "Unable to clone repo."; exit 1; }
+}
+
+
+
+prepare_svn_repo (){
+
+    # CHECKOUT SVN DIR IF NOT EXISTS
+    if [[ ! -d $TEMP_SVN_REPO ]];
+    then
+        echo "Checking out WordPress.org plugin repository"
+        svn checkout --username $SVN_USER $SVN_REPO $TEMP_SVN_REPO || { echo "Unable to checkout repo."; exit 1; }
+    fi
+}
+
+
+
+prepare_for_release (){
+
+    # MOVE INTO GIT DIR
+    cd $ROOT_PATH$TEMP_GITHUB_REPO
+
+    # Switch Branch
+    echo "Switching to branch"
+    git checkout ${GITHUB_TAG_NAME} || { echo "Unable to checkout branch."; exit 1; }
+
+
+    # Check version in readme.txt is the same as plugin file after translating both to unix line breaks to work around grep's failure to identify mac line breaks
+    NEWVERSION1=`grep "^Stable tag:" README.txt | awk -F' ' '{print $NF}'`
+    echo "readme.txt version: $NEWVERSION1"
+    NEWVERSION2=`grep "^ \* Version:" $MAINFILE | awk -F' ' '{print $NF}'`
+    echo "$MAINFILE version: $NEWVERSION2"
+
+    if [ "$NEWVERSION1" != "$NEWVERSION2" ]; then echo "Version in readme.txt & $MAINFILE don't match. Exiting...."; exit 1; fi
+
+
+   if [ "$NEWVERSION1" != "$GITHUB_TAG_NAME" ]; then echo "Version don't match with tags, Exiting...."; exit 1; fi
+
+
+    echo "Versions match in readme.txt and $MAINFILE. Let's proceed..."
+
+    npm run release || { echo "Error on build"; exit 1; }
+
+    # REMOVE UNWANTED FILES & FOLDERS
+    echo "Removing unwanted files"
+    rm -Rf .git
+    rm -Rf .github
+    rm -Rf tests
+    rm -Rf apigen
+    rm -f .gitattributes
+    rm -f .gitignore
+    rm -f .gitmodules
+    rm -f .travis.yml
+    rm -f Gruntfile.js
+    rm -f package.json
+    rm -f .jscrsrc
+    rm -f .jshintrc
+    rm -f composer.json
+    rm -f phpunit.xml
+    rm -f phpunit.xml.dist
+    rm -f README.md
+    rm -f .coveralls.yml
+    rm -f .editorconfig
+    rm -f .scrutinizer.yml
+    rm -f apigen.neon
+    rm -f CHANGELOG.txt
+    rm -f CONTRIBUTING.md
+    rm -f deploy.sh
+}
+
+
+
+release_it() {
+    # MOVE INTO SVN DIR
+    cd $ROOT_PATH$TEMP_SVN_REPO
+
+    # UPDATE SVN
+    echo "Updating SVN"
+    svn update || { echo "Unable to update SVN."; exit 1; }
+
+    # DELETE TRUNK
+    echo "Replacing trunk"
+    rm -Rf trunk/
+
+    # COPY GIT DIR TO TRUNK
+    cp -R $ROOT_PATH$TEMP_GITHUB_REPO trunk/
+
+    # DO THE ADD ALL NOT KNOWN FILES UNIX COMMAND
+    svn add --force * --auto-props --parents --depth infinity -q
+
+    # DO THE REMOVE ALL DELETED FILES UNIX COMMAND
+    MISSING_PATHS=$( svn status | sed -e '/^!/!d' -e 's/^!//' )
+
+    # iterate over filepaths
+    for MISSING_PATH in $MISSING_PATHS; do
+        svn rm --force "$MISSING_PATH"
+    done
+
+    # COPY TRUNK TO TAGS/$VERSION
+    echo "Copying trunk to new tag"
+    svn copy trunk tags/${VERSION} || { echo "Unable to create tag."; exit 1; }
+
+    # DO SVN COMMIT
+    clear
+    echo "Showing SVN status"
+    svn status
+
+
+    if $INTERACTIVE ; then
+
+        # PROMPT USER
+        echo "";
+        read -p "PRESS [ENTER] TO COMMIT RELEASE "${VERSION}" TO WORDPRESS.ORG AND GITHUB";
+        echo "";
+
+    fi
+
+    # DEPLOY
+    echo ""
+    echo "Committing to WordPress.org...this may take a while..."
+    svn commit -m "Release "${VERSION}", see readme.txt for the changelog." || { echo "Unable to commit."; exit 1; }
+
+}
+
+
+
+
+
+
+
+echo "************ [1/7] Check enviroment ************"
+check_env
+echo "************ [2/7] Clean repository space ************"
+clean_repo
+echo "************ [3/7] Get git repository ************"
+prepare_git_repo
+echo "************ [4/7] Get svn repository ************"
+prepare_svn_repo
+echo "************ [5/7] Prepare code for release ************"
+prepare_for_release
+echo "************ [6/7] Release It ************"
+release_it
+echo "************ [7/7] Done Clean Up ************ "
+clean_repo
+
+echo "RELEASER DONE :D"

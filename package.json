@@ -12,7 +12,7 @@
   "scripts": {
     "prestart": "npm  install",
     "start": "grunt dev",
-    "finalize": "grunt publish"
+    "release": "npm install && grunt release "
   },
   "keywords": [
     "Endomondo",
