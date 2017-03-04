@@ -1,9 +1,9 @@
-=== EndomondoWP ===
+﻿=== EndomondoWP ===
 Contributors: Odyno
 Tags: Endomondo, Sport, Tracker, embedding, GPS, Fitness, Wellness
 Donate link: http://www.staniscia.net/donate
 Requires at least: 3.4.2
-Tested up to: 4.5.1
+Tested up to: 4.7.2
 Stable tag: 0.1.0
 License: GPLv2
 License URI: http://www.gnu.org/licenses/gpl-2.0.html
@@ -111,6 +111,13 @@ Foundation, Inc., 51 Franklin St, Fifth Floor, Boston, MA  02110-1301  USA
 
 = ToDo =
 * I18n
+
+= 0.1.1 =
+* deploy system + github repo
+
+= 0.1.0 =
+* https supports
+
 
 = 0.0.6 =
 * Added view "workout" for the showing of one specific workout
